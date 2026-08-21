@@ -59,11 +59,11 @@ const AGE_POLICY = {
 };
 const PSY = {
   verbal:
-    "Nilai verbal mengukur apakah peserta bisa menjelaskan makna dengan bahasa. Bukan aksen, tempo, atau 'pintar secara umum'.",
+    "Kunci ini mengatur elicitation soal, bukan penskoran isi jawaban. Nilai verbal adalah prediksi model akustik voiLPTUI dari rekaman seksi itu — bukan skor rubrik makna.",
   logika:
-    "Nilai logika mengukur apakah peserta bisa menilai kapan suatu alasan menopang dugaan. Bukan tes istilah pelajaran, bukan tes kosakata.",
+    "Kunci ini mengatur elicitation soal, bukan penskoran isi jawaban. Nilai logika adalah prediksi model akustik Voilogik dari rekaman seksi itu — bukan penilaian benar-salah teks soal.",
   kuantitatif:
-    "Nilai kuantitatif mengukur hitungan, rasio, pola, dan alasan angka yang diucapkan. Menyebut angka tanpa langkah belum bukti penalaran.",
+    "Kunci ini mengatur elicitation soal, bukan penskoran isi jawaban. Nilai kuantitatif adalah prediksi model akustik Voikuan dari rekaman seksi itu — bukan eksekusi rumus tertulis.",
 };
 const REGISTER = "bahasa Indonesia sehari-hari, kalimat pendek, tanpa jargon eksklusif";
 const VOCAB = "kosakata frekuensi tinggi yang dipahami semua jenjang pendidikan, hindari istilah eksklusif";
@@ -271,13 +271,13 @@ function reasonsFor(p, domain, c) {
   return [
     {
       kind: "construct",
-      tag: "Konstruk = identitas nilai",
-      text: `${CONSTRUCT[domain]} ${PSY[domain]} Tanpa kunci ini, LLM bisa menulis soal yang “bagus” tetapi mewakili nilai lain.`,
+      tag: "Kunci konstruk operasional",
+      text: `${CONSTRUCT[domain]} ${PSY[domain]} Tanpa kunci ini, LLM bisa menulis soal yang rapi tetapi salah seksi. Kunci ini bukan item CHC/ECD dan bukan rubrik 0–4.`,
     },
     {
       kind: "difficulty",
       tag: `Kesulitan ${fmt(c.target)} dari band ${p.band}`,
-      text: `Pendidikan tidak meramal kemampuan. Kode memetakan jenjang ke rentang kesulitan, lalu mengambil titik tengah. Untuk ${domain}, rentang ${fmt(c.low)}–${fmt(c.high)}. Kuantitatif pada dasar/menengah/diploma digeser −0,05 supaya hitungan lisan tidak kelebihan beban.`,
+      text: `Band pendidikan memang menetapkan difficulty_target: kode memetakan jenjang ke rentang, lalu mengambil titik tengah. Untuk ${domain}, rentang ${fmt(c.low)}–${fmt(c.high)}. Kuantitatif pada dasar/menengah/diploma digeser −0,05. Ini bukan adaptasi IRT; usia tidak mengubah angka ini.`,
     },
     {
       kind: "limit",
@@ -323,6 +323,34 @@ function leaksFor(p) {
   ];
 }
 
+function constructRows(domain) {
+  const model = MODEL[domain];
+  const reject = {
+    verbal: "Soal hitung; teka-teki aturan.",
+    logika: "Soal hitung; tes kosakata semata; pertanyaan ya atau tidak.",
+    kuantitatif: "Wacana verbal semata; notasi yang tidak dapat diucapkan.",
+  };
+  const elicit = {
+    verbal: "Arti kata yang mirip atau berlawanan, perbandingan sehari-hari, atau menjelaskan makna — dijawab lisan.",
+    logika: "Menjelaskan kapan suatu alasan kuat atau lemah untuk suatu dugaan, atau kapan “kalau A maka B” tidak selalu benar.",
+    kuantitatif: "Hitung, rasio, atau pola angka yang bisa diucapkan lengkap dalam batas waktu.",
+  };
+  return [
+    ["Nilai / seksi", `${domain} · <code>section_key</code> = <code>${domain}</code>`],
+    ["Teks kunci produksi", `${escapeHtml(CONSTRUCT[domain])} <span class="meaning">Sumber: <code>_DOMAIN_CONSTRUCT</code></span>`],
+    ["Elicitation yang diinginkan", escapeHtml(elicit[domain])],
+    ["Yang ditolak kunci", escapeHtml(reject[domain])],
+    [
+      "Yang tidak ada di produksi",
+      "Rubrik 0–4; <code>known_solution</code>; bank item kurasi; spesifikasi CHC/ECD lengkap. Kunci ini operasional, bukan tes terbit.",
+    ],
+    [
+      "Yang menskor nilai",
+      `${escapeHtml(model.product)} (<code>${escapeHtml(model.id)}</code>) menskor audio seksi ini. Model tidak membaca teks soal. Family akustik: <code>${escapeHtml(model.family)}</code>.`,
+    ],
+  ];
+}
+
 function wrapLabel(p) {
   return p.ageBand === "remaja" ? "sekolah/rumah" : p.occupation;
 }
@@ -332,11 +360,12 @@ function setDomain(domain) {
   document.querySelectorAll(".domain-btn").forEach((b) => {
     b.setAttribute("aria-pressed", String(b.dataset.domain === domain));
   });
-  document.querySelectorAll("[data-col]").forEach((el) => {
+  document.querySelectorAll(".ident tbody tr[data-col]").forEach((el) => {
     el.classList.toggle("is-on", el.dataset.col === domain);
   });
-  document.querySelectorAll("col[data-col]").forEach((el) => {
-    el.classList.toggle("hit", el.dataset.col === domain);
+  const diffCol = domain === "kuantitatif" ? "kuantitatif" : "verbal";
+  document.querySelectorAll(".diff [data-col]").forEach((el) => {
+    el.classList.toggle("is-on", el.dataset.col === diffCol);
   });
   render();
 }
@@ -346,11 +375,44 @@ function render() {
   const domain = state.domain;
   const c = constraints(p, domain);
   const prompt = assemblePrompt(p, domain, c);
-  document.getElementById("derived").innerHTML = `
-        <div class="stat"><small>education_band</small><b>${p.band}</b></div>
-        <div class="stat"><small>age_band</small><b>${p.ageBand.replace("_", " ")}</b></div>
-        <div class="stat"><small>difficulty_target · ${domain}</small><b>${fmt(c.target)}</b></div>
-      `;
+  const ageLabel = p.ageBand.replaceAll("_", " ");
+  document.getElementById("derived").innerHTML = [
+    ["education_band", "Hasil pemetaan jenjang → band", `<code>${p.band}</code>`, ""],
+    [
+      "difficulty_target",
+      `Titik tengah rentang seksi ${domain} (skala 0–1)`,
+      fmt(c.target),
+      "num",
+    ],
+    ["difficulty range", "Batas rendah–tinggi di prompt", `${fmt(c.low)}–${fmt(c.high)}`, "num"],
+    ["age_band", "Konteks penyampaian, bukan cutoff", escapeHtml(ageLabel), ""],
+    ["occupation", "Bungkus familiar; DATA literal", escapeHtml(p.occupation), ""],
+  ]
+    .map(
+      ([param, meaning, value, align]) => `
+        <tr>
+          <th scope="row"><code>${param}</code></th>
+          <td class="meaning">${meaning}</td>
+          <td class="${align}">${value}</td>
+        </tr>
+      `,
+    )
+    .join("");
+  document.querySelectorAll(".diff tbody tr[data-band]").forEach((el) => {
+    el.classList.toggle("is-on", el.dataset.band === p.band);
+  });
+  const constructUnit = document.getElementById("construct-unit");
+  if (constructUnit) constructUnit.textContent = `nilai ${domain}`;
+  document.getElementById("construct-body").innerHTML = constructRows(domain)
+    .map(
+      ([k, v]) => `
+        <tr>
+          <th scope="row">${k}</th>
+          <td>${v}</td>
+        </tr>
+      `,
+    )
+    .join("");
   const pre = document.getElementById("prompt");
   pre.innerHTML = markedPrompt(prompt, domain, p, c);
   pre.querySelectorAll("mark").forEach((el) => {
@@ -398,9 +460,9 @@ function render() {
   const stem = illustration(p, domain);
   document.getElementById("stem-text").textContent = "“" + stem + "”";
   document.getElementById("stem-why").innerHTML =
-    `<strong>Mengapa ini perwakilan ${domain}:</strong> ` +
+    `<strong>Ilustrasi kunci ${domain}:</strong> ` +
     escapeHtml(CONSTRUCT[domain]) +
-    ` Pekerjaan/usia hanya membungkus konteks (${escapeHtml(wrapLabel(p))}), tidak mengganti nilai yang diukur. Model ${model.product} (${model.id}) kemudian menskor audio jawaban, bukan teks soal ini.`;
+    ` Pekerjaan/usia hanya membungkus konteks (${escapeHtml(wrapLabel(p))}), tidak mengganti seksi. Model ${model.product} (${model.id}) kemudian menskor audio jawaban, bukan teks soal ini. Stem ini disusun agar lolos kunci — bukan output LLM live.`;
   document.getElementById("checks").innerHTML = validate(stem)
     .map((v) => `<span class="pill ${v.ok ? "ok" : "bad"}">${v.ok ? "lolos" : "gagal"} · ${v.label}</span>`)
     .join("");

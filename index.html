@@ -3,50 +3,52 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Model, suara, dan AI — LPTUI Vocharu</title>
+  <title>Tiga sistem asesmen suara — LPTUI Vocharu</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Source+Sans+3:ital,wght@0,400;0,600;0,650;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <a class="skip" href="#peta">Langsung ke peta hubungan</a>
+  <a class="skip" href="#peta">Langsung ke pemetaan sistem</a>
   <div class="wrap">
     <header class="mast">
-      <div>LPTUI Vocharu · explainer di luar repo</div>
-      <div>sumber <span class="mono">origin/dev @ 45e2797</span> · 21 Agu 2026</div>
+      <div>LPTUI · bahan penjelasan teknis</div>
+      <div>kode <span class="mono">origin/dev @ 45e2797</span> · 21 Agustus 2026</div>
     </header>
     <nav aria-label="Isi halaman">
       <ul class="toc">
-        <li><a href="#peta">Hubungan potongan</a></li>
+        <li><a href="#peta">Tiga sistem</a></li>
         <li><a href="#tiga-nilai">Tiga nilai</a></li>
-        <li><a href="#kunci-soal">Kunci soal</a></li>
-        <li><a href="#bukan-perwakilan">Bukan perwakilan</a></li>
+        <li><a href="#batas">Batas interpretasi</a></li>
+        <li><a href="#kunci-soal">Demonstrasi constraint</a></li>
+        <li><a href="#bukan-perwakilan">Kebocoran seksi</a></li>
         <li><a href="#urutan">Urutan kerja</a></li>
       </ul>
     </nav>
 
-    <h1>Soal, suara, dan skor bukan satu AI yang sama.</h1>
+    <h1>Soal, skor audio, dan narasi laporan bukan satu sistem yang sama.</h1>
     <p class="lede prose">
-      Satu asesmen suara punya <strong>tiga seksi</strong>. Tiap seksi menghasilkan
-      <strong>satu nilai</strong> — verbal, logika, atau kuantitatif — dari jawaban yang diucapkan,
-      bukan dari teks soal. LLM menulis pertanyaan. Model akustik yang berbeda menskor rekaman.
-      LLM lain lagi menulis narasi PDF. Ketiganya jangan dicampur.
+      Asesmen suara LPTUI punya <strong>tiga seksi</strong>. Setiap seksi punya satu pertanyaan,
+      satu rekaman, satu model akustik, dan satu <strong>nilai</strong>
+      (verbal, logika, atau kuantitatif). Nilai itu dihitung dari <em>audio jawaban</em>,
+      bukan dari teks soal. Yang menulis soal, yang menskor rekaman, dan yang menulis
+      narasi PDF adalah tiga pemroses terpisah — jangan disebut “AI” seolah-olah satu hal.
     </p>
     <p class="note prose">
-      Halaman ini menjelaskan hubungan itu, lalu — di bawah — menunjukkan mengapa satu pertanyaan
-      mewakili satu nilai. Contoh identitas dianonimkan. Repo produksi tidak diubah.
+      Teks ini untuk diskusi dengan dosen psikometri / asesmen kognitif: membedakan
+      tumpukan constraint produksi dari klaim tes terbit. Demonstrasi di bawah adalah
+      <strong>ilustrasi</strong> constraint, bukan output LLM live. Identitas peserta fiktif.
     </p>
   </div>
 
   <section class="block" id="peta">
     <div class="wrap">
-      <p class="kicker">01 · Hubungan potongan</p>
-      <h2>Identitas → soal → suara → QC → model seksi → nilai</h2>
+      <p class="kicker">01 · Tiga pemroses</p>
+      <h2>LLM menulis soal; model akustik menskor audio; LLM lain menulis narasi.</h2>
       <p class="prose">
-        Alur produksi, dari kiri ke kanan. Kotak berwarna menandai dua sistem yang sering
-        disebut “AI” padahal kerjanya berbeda: LLM menulis soal; model akustik menskor audio.
-        Narasi PDF adalah LLM ketiga, belakangan, dan tidak masuk ke skor.
+        Alur produksi dari kiri ke kanan. Dua langkah yang sering disamakan sebagai “AI”
+        kerjanya berbeda. Narasi PDF datang belakangan dan tidak masuk ke skor.
       </p>
     </div>
     <div class="wide">
@@ -54,12 +56,12 @@
         <div class="step">
           <span class="n">01</span>
           <b>Identitas</b>
-          <p>Usia, pendidikan, pekerjaan. Band pendidikan → difficulty_target. Usia hanya konteks.</p>
+          <p>Usia, pendidikan, pekerjaan. Band pendidikan menetapkan <span class="mono">difficulty_target</span>. Usia hanya konteks.</p>
         </div>
         <div class="step is-llm">
           <span class="n">02 · LLM soal</span>
           <b>Tulis pertanyaan</b>
-          <p><code>question_generation</code>. Auto-approve setelah validator. Tidak menskor peserta.</p>
+          <p>Family <span class="mono">question_generation</span>. Auto-approve setelah validator bentuk. Tidak menskor peserta.</p>
         </div>
         <div class="step is-audio">
           <span class="n">03</span>
@@ -69,12 +71,12 @@
         <div class="step">
           <span class="n">04</span>
           <b>QC audio</b>
-          <p>Lulus atau gagal mutu rekaman. Bukan skor kognitif. Gagal → nilai seksi itu absen.</p>
+          <p>Lulus atau gagal mutu rekaman. Bukan validitas konstruk. Gagal → nilai seksi itu absen.</p>
         </div>
         <div class="step is-model">
           <span class="n">05 · Model seksi</span>
           <b>Skor dari audio</b>
-          <p>voiLPTUI / Voilogik / Voikuan. Tidak pernah melihat teks soal. Hanya audio.</p>
+          <p>voiLPTUI / Voilogik / Voikuan. Tidak membaca teks soal. Hanya audio seksi yang cocok.</p>
         </div>
         <div class="step">
           <span class="n">06</span>
@@ -84,7 +86,7 @@
         <div class="step is-later">
           <span class="n">07 · belakangan</span>
           <b>Narasi PDF</b>
-          <p><code>narrative_generation</code>. LLM menulis teks laporan dari skor. Bukan soal, bukan skor.</p>
+          <p>Family <span class="mono">narrative_generation</span>. LLM menulis teks laporan dari skor. Bukan soal, bukan skor.</p>
         </div>
       </div>
     </div>
@@ -94,9 +96,9 @@
           <div class="who">Bukan penskor</div>
           <h3>LLM soal</h3>
           <p>
-            Family <code>question_generation</code>. Menulis satu pertanyaan terbuka dari
-            pendidikan, usia, dan pekerjaan. Validator deterministik memeriksa bentuk;
-            sistem menyetujui tanpa tinjauan ahli.
+            Family <code>question_generation</code>. Menulis satu pertanyaan terbuka
+            dari pendidikan, usia, dan pekerjaan. Validator deterministik memeriksa
+            bentuk; sistem menyetujui tanpa tinjauan ahli.
           </p>
           <p>Tidak melihat rekaman. Tidak mengeluarkan nilai.</p>
         </article>
@@ -125,12 +127,12 @@
           <p>
             Peserta merekam 60–120 detik per seksi. Backend merakit potongan, menjalankan QC,
             lalu memanggil layanan model yang cocok. Model tidak “mengerti soal”; ia menskor
-            ciri akustik jawaban. Jika QC gagal setelah percobaan ulang, nilai seksi itu
+            ciri akustik rekaman. Jika QC gagal setelah percobaan ulang, nilai seksi itu
             dibiarkan kosong — bukan diisi nol.
           </p>
         </div>
         <div class="callout">
-          <h3>Risiko yang diterima</h3>
+          <h3>Risiko yang diterima (ADR 0003)</h3>
           <p>
             Produksi tetap memakai tiga soal domain karena satu seksi = satu nilai.
             Menskor satu rekaman dengan tiga model, atau mengulang satu prompt Q1 tiga kali,
@@ -143,85 +145,189 @@
   </section>
 
   <section class="block" id="tiga-nilai">
-    <div class="wide">
+    <div class="wrap">
       <p class="kicker">02 · Tiga nilai, tiga model</p>
-      <h2>Setiap nilai punya seksi, konstruk soal, dan family akustik sendiri.</h2>
+      <h2>Setiap nilai punya seksi, kunci soal operasional, dan family akustik sendiri.</h2>
       <p class="prose">
-        Kolom yang sedang dipilih di kunci soal (bawah) ditandai di sini. Konstruk mengatur
-        <em>apa yang ditanyakan</em>. Family akustik mengatur <em>model mana yang menskor audio</em>.
-        Keduanya tidak boleh tertukar.
+        Family akustik adalah gerbang kompatibilitas model, bukan family LLM.
+        Kunci konstruk mengatur <em>apa yang ditanyakan</em>. Model akustik mengatur
+        <em>rekaman mana yang diskor</em>. Keduanya tidak boleh tertukar.
       </p>
-      <div class="table-wrap">
-        <table class="nilai">
-          <colgroup>
-            <col />
-            <col data-col="verbal" class="hit" />
-            <col data-col="logika" />
-            <col data-col="kuantitatif" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th scope="col">Yang dibanding</th>
-              <th scope="col" data-col="verbal" class="is-on">Verbal</th>
-              <th scope="col" data-col="logika">Logika</th>
-              <th scope="col" data-col="kuantitatif">Kuantitatif</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Seksi</th>
-              <td><code>verbal</code></td>
-              <td><code>logika</code></td>
-              <td><code>kuantitatif</code></td>
-            </tr>
-            <tr>
-              <th scope="row">Konstruk soal</th>
-              <td>Arti kata yang mirip atau berlawanan, perbandingan sehari-hari, atau menjelaskan makna. Bukan hitung, bukan teka-teki aturan.</td>
-              <td>Jelaskan kapan suatu alasan kuat atau lemah, atau kapan “kalau A maka B” tidak selalu benar. Bukan hitung, bukan tes kosakata, bukan ya/tidak.</td>
-              <td>Hitung, rasio, atau pola angka yang bisa diucapkan. Bukan wacana verbal semata, bukan notasi yang tidak terucap.</td>
-            </tr>
-            <tr>
-              <th scope="row">Family akustik</th>
-              <td><code>prompt_family_q1</code></td>
-              <td><code>prompt_family_q1_logika</code></td>
-              <td><code>prompt_family_q1_kuantitatif</code></td>
-            </tr>
-            <tr>
-              <th scope="row">Produk model</th>
-              <td>voiLPTUI · <code>xgb_q1_feat158_r027</code> · ~8100</td>
-              <td>Voilogik · <code>xgb_q1_feat158_logika_r020</code> · ~8101</td>
-              <td>Voikuan · <code>xgb_q1_feat120_kuant_r011</code> · ~8102</td>
-            </tr>
-            <tr>
-              <th scope="row">Audio untuk apa</th>
-              <td>Menskor jawaban lisan seksi verbal. Model tidak membaca pertanyaan.</td>
-              <td>Menskor jawaban lisan seksi logika. Bukan menilai “benar-salah” teks soal.</td>
-              <td>Menskor jawaban lisan seksi kuantitatif. Bukan mengeksekusi rumus tertulis.</td>
-            </tr>
-          </tbody>
-        </table>
+
+      <div class="table-scroll">
+      <table class="sheet ident">
+        <caption>
+          <span class="cap-n">Tabel 1.</span>
+          Identitas produksi per nilai. Satu baris = satu seksi = satu rekaman = satu model.
+          Family akustik bukan family LLM <code>question_generation</code>.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Nilai</th>
+            <th scope="col">Seksi <span class="unit">section_key</span></th>
+            <th scope="col">Produk model <span class="unit">pin di baris kedua</span></th>
+            <th scope="col">Family akustik <span class="unit">bukan family LLM</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-col="verbal">
+            <th scope="row">Verbal</th>
+            <td><code>verbal</code></td>
+            <td>voiLPTUI <span class="subcode">xgb_q1_feat158_r027</span></td>
+            <td class="mono-cell"><code>prompt_family_q1</code></td>
+          </tr>
+          <tr data-col="logika">
+            <th scope="row">Logika</th>
+            <td><code>logika</code></td>
+            <td>Voilogik <span class="subcode">xgb_q1_feat158_logika_r020</span></td>
+            <td class="mono-cell"><code>prompt_family_q1_logika</code></td>
+          </tr>
+          <tr data-col="kuantitatif">
+            <th scope="row">Kuantitatif</th>
+            <td><code>kuantitatif</code></td>
+            <td>Voikuan <span class="subcode">xgb_q1_feat120_kuant_r011</span></td>
+            <td class="mono-cell"><code>prompt_family_q1_kuantitatif</code></td>
+          </tr>
+        </tbody>
+      </table>
       </div>
-      <p class="tpa prose">
-        <strong>TPA</strong> adalah rata-rata ketiga nilai jika ketiganya ada.
-        Runtime akustik bersama (FFmpeg / eGeMAPS / RICH8 / QC) dipakai ketiga layanan.
-        QC lulus/gagal pada mutu audio; seksi yang gagal QC tidak masuk rata-rata.
+      <p class="table-note">
+        Baris yang ditandai mengikuti nilai yang dipilih di bagian demonstrasi.
+        TPA = rata-rata ketiga nilai, dua desimal, hanya jika ketiganya ada.
+        Runtime DSP/QC (FFmpeg, eGeMAPS, RICH8) dipakai ketiga layanan; QC tidak mengukur konstruk.
       </p>
+
+      <table class="sheet construct" id="construct-table">
+        <caption>
+          <span class="cap-n">Tabel 2.</span>
+          Kunci konstruk operasional untuk nilai yang sedang diperiksa.
+          Ini teks <code>_DOMAIN_CONSTRUCT</code>, bukan item CHC/ECD dengan rubrik.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Aspek</th>
+            <th scope="col">Isi di produksi <span class="unit" id="construct-unit">nilai verbal</span></th>
+          </tr>
+        </thead>
+        <tbody id="construct-body"></tbody>
+      </table>
+
+      <div class="table-scroll">
+      <table class="sheet diff" id="diff-table">
+        <caption>
+          <span class="cap-n">Tabel 3.</span>
+          Band pendidikan menetapkan <code>difficulty_target</code> (titik tengah rentang, skala 0–1 di prompt).
+          Bukan parameter IRT, bukan adaptasi item.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Band pendidikan</th>
+            <th scope="col">Jenjang yang dipetakan <span class="unit">LEVEL_TO_BAND</span></th>
+            <th scope="col" class="num" data-col="verbal">Verbal &amp; logika <span class="unit">target (rentang)</span></th>
+            <th scope="col" class="num" data-col="kuantitatif">Kuantitatif <span class="unit">target (rentang)</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr data-band="dasar">
+            <th scope="row">dasar</th>
+            <td><code>sd</code>, <code>smp</code></td>
+            <td class="num" data-col="verbal">0.25 <span class="range">0.15–0.35</span></td>
+            <td class="num" data-col="kuantitatif">0.20 <span class="range">0.10–0.30</span></td>
+          </tr>
+          <tr data-band="menengah">
+            <th scope="row">menengah</th>
+            <td><code>sma</code>, <code>smk</code></td>
+            <td class="num" data-col="verbal">0.40 <span class="range">0.30–0.50</span></td>
+            <td class="num" data-col="kuantitatif">0.35 <span class="range">0.25–0.45</span></td>
+          </tr>
+          <tr data-band="diploma">
+            <th scope="row">diploma</th>
+            <td><code>d3</code>, <code>d4</code></td>
+            <td class="num" data-col="verbal">0.53 <span class="range">0.45–0.60</span></td>
+            <td class="num" data-col="kuantitatif">0.48 <span class="range">0.40–0.55</span></td>
+          </tr>
+          <tr data-band="sarjana">
+            <th scope="row">sarjana</th>
+            <td><code>s1</code>, <code>insinyur</code></td>
+            <td class="num" data-col="verbal">0.65 <span class="range">0.55–0.75</span></td>
+            <td class="num" data-col="kuantitatif">0.65 <span class="range">0.55–0.75</span></td>
+          </tr>
+          <tr data-band="pascasarjana">
+            <th scope="row">pascasarjana</th>
+            <td><code>s2</code>, <code>s3</code>, <code>profesor</code></td>
+            <td class="num" data-col="verbal">0.80 <span class="range">0.70–0.90</span></td>
+            <td class="num" data-col="kuantitatif">0.80 <span class="range">0.70–0.90</span></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="table-note">
+        Baris yang ditandai adalah band profil demonstrasi. Kuantitatif pada dasar / menengah / diploma
+        digeser −0,05 agar hitungan lisan tidak kelebihan beban. Usia <em>tidak</em> mengubah kolom ini.
+        Register bahasa Indonesia sehari-hari sama untuk semua baris; yang berubah adalah isi tugas
+        (<code>_DOMAIN_LIMITS</code>).
+      </p>
+    </div>
+  </section>
+
+  <section class="block" id="batas">
+    <div class="wrap">
+      <p class="kicker">03 · Batas interpretasi</p>
+      <h2>Yang dilakukan produksi, dan yang belum diklaim.</h2>
+      <aside class="limits" aria-labelledby="limits-title">
+        <h3 id="limits-title">Batas interpretasi — yang belum diklaim</h3>
+        <p>
+          Kunci soal di produksi adalah tumpukan constraint operasional, bukan spesifikasi tes terbit.
+          Di ruang dosen, yang dapat dipertahankan adalah pemisahan sistem dan batas klaim berikut.
+        </p>
+        <ul>
+          <li>
+            <strong>Tiga pemroses.</strong> LLM menulis soal (<code>question_generation</code>);
+            model akustik menskor <em>audio</em>; narasi PDF adalah LLM lain
+            (<code>narrative_generation</code>). Jangan disamakan sebagai satu “AI”.
+          </li>
+          <li>
+            <strong>Kunci konstruk operasional.</strong> Produksi mengunci elicitation lewat
+            <code>_DOMAIN_CONSTRUCT</code>. Itu bukan item CHC/ECD lengkap, bukan rubrik 0–4,
+            bukan <code>known_solution</code>, dan bukan bank item kurasi. Prompt live bukan tes terbit.
+          </li>
+          <li>
+            <strong>Pelatihan vs produksi.</strong> voiLPTUI / Voilogik / Voikuan dilatih pada audio
+            VoiceIQ <code>pertanyaan == 1</code>. Produksi tetap memakai tiga soal domain (ADR 0003).
+            Pergeseran kovariat adalah risiko sisa yang diterima. Alat bantu skrining, bukan tes
+            klinis atau tes IQ tervalidasi.
+          </li>
+          <li>
+            <strong>Bukan adaptif IRT.</strong> Band pendidikan <em>memang</em> menetapkan
+            <code>difficulty_target</code> (titik tengah rentang 0–1). Usia hanya konteks penyampaian.
+            Pekerjaan hanya bungkus familiar. Tidak ada pemilihan item dari kalibrasi.
+          </li>
+          <li>
+            <strong>Register sama, tugas berbeda.</strong> Bahasa Indonesia sehari-hari dipakai
+            untuk semua jenjang. Yang berubah adalah isi tugas, bukan jargon eksklusif.
+          </li>
+          <li>
+            <strong>QC ≠ validitas.</strong> QC adalah gerbang mutu audio (lulus/gagal).
+            TPA = rata-rata ketiga nilai, dua desimal, hanya jika ketiganya ada.
+          </li>
+        </ul>
+      </aside>
     </div>
   </section>
 
   <section class="block" id="kunci-soal">
     <div class="wrap">
-      <p class="kicker">03 · Mengapa soal mewakili nilai</p>
-      <h2>LLM tidak memilih item dari bank. Ia menulis satu pertanyaan terkunci ke konstruk seksi.</h2>
+      <p class="kicker">04 · Demonstrasi tumpukan constraint</p>
+      <h2>LLM tidak memilih item dari bank. Ia menulis satu pertanyaan yang dikunci ke konstruk seksi.</h2>
       <p class="prose">
-        Ubah profil, pilih nilai. Alasan di kanan mengikuti constraint produksi yang sama.
-        Prompt sistem ada di lipatan, bukan dinding pertama yang dilihat mata.
-        Keyboard <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> mengganti nilai tanpa animasi.
+        Ubah profil, pilih nilai. Alasan di bawah mengikuti constraint produksi yang sama.
+        Stem adalah <strong>ilustrasi</strong> yang disusun agar lolos kunci — bukan output LLM live.
+        Prompt sistem ada di lipatan. Papan ketik <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> mengganti nilai.
       </p>
 
       <div class="instrument">
         <fieldset class="panel">
-          <legend>Identitas peserta (input_data)</legend>
+          <legend>Identitas peserta (contoh fiktif)</legend>
           <div class="fields">
             <label>
               <span>Usia</span>
@@ -253,27 +359,40 @@
             <button type="button" class="chip" data-preset="s2">S2 42 · dosen</button>
           </div>
         </fieldset>
-        <div class="panel">
-          <legend style="display:block;margin-bottom:10px">Yang dihitung backend, bukan tebakan LLM</legend>
-          <div class="derived" id="derived"></div>
+        <div class="panel panel-table">
+          <table class="sheet compact" id="derived-table">
+            <caption>
+              <span class="cap-n">Tabel 4.</span>
+              Parameter yang dihitung backend untuk profil ini, lalu disisipkan ke CONSTRAINTS.
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Parameter</th>
+                <th scope="col">Arti</th>
+                <th scope="col">Nilai</th>
+              </tr>
+            </thead>
+            <tbody id="derived"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
-    <div class="wide">
-      <div class="domains" role="tablist" aria-label="Nilai">
+    <div class="wrap">
+      <p class="chooser-label" id="nilai-chooser-label">Nilai yang diperiksa</p>
+      <div class="domains" role="tablist" aria-labelledby="nilai-chooser-label">
         <button type="button" class="domain-btn" data-domain="verbal" aria-pressed="true">
-          <div class="kicker">nilai 1 · seksi verbal · voiLPTUI</div>
+          <div class="kicker">nilai 1 · voiLPTUI</div>
           <h3>Verbal</h3>
-          <p>Makna kata, perbandingan, penjelasan berbahasa. Bukan hitung, bukan teka-teki aturan.</p>
+          <p>Makna kata, perbandingan, penjelasan. Bukan hitung, bukan teka-teki aturan.</p>
         </button>
         <button type="button" class="domain-btn" data-domain="logika" aria-pressed="false">
-          <div class="kicker">nilai 2 · seksi logika · Voilogik</div>
+          <div class="kicker">nilai 2 · Voilogik</div>
           <h3>Logika</h3>
           <p>Kapan alasan kuat atau lemah; kapan “kalau A maka B” tidak selalu benar.</p>
         </button>
         <button type="button" class="domain-btn" data-domain="kuantitatif" aria-pressed="false">
-          <div class="kicker">nilai 3 · seksi kuantitatif · Voikuan</div>
+          <div class="kicker">nilai 3 · Voikuan</div>
           <h3>Kuantitatif</h3>
           <p>Hitung, rasio, atau pola angka yang bisa diucapkan. Bukan wacana verbal semata.</p>
         </button>
@@ -283,18 +402,18 @@
     <div class="wrap">
       <div class="stage">
         <section>
-          <h3>Mengapa soal ini mewakili nilai tersebut</h3>
-          <p class="hint">Klik satu alasan. Bagian yang sama di prompt (jika dibuka) ikut ditandai.</p>
+          <h3>Mengapa pertanyaan ini dikunci ke nilai tersebut</h3>
+          <p class="hint">Klik satu alasan. Bagian yang sama di prompt (jika dibuka) ikut ditandai. Ini demonstrasi constraint produksi, bukan bukti validitas konstruk.</p>
           <div class="reasons" id="reasons"></div>
           <article class="stem">
-            <div class="kicker">Ilustrasi soal yang lolos kunci konstruk — bukan output LLM live</div>
+            <div class="kicker">Ilustrasi stem yang lolos kunci konstruk — bukan output LLM live</div>
             <blockquote id="stem-text"></blockquote>
             <p id="stem-why"></p>
             <div class="checks" id="checks"></div>
           </article>
           <details class="fold">
             <summary>System prompt yang dikunci ke nilai ini (template produksi)</summary>
-            <p class="hint" style="margin:0 1rem 0.6rem">
+            <p class="hint fold-hint">
               Garis bawah berwarna bisa diklik. Ini interpolasi
               <span class="mono">QUESTION_SYSTEM_INSTRUCTION_TEMPLATE</span>.
             </p>
@@ -316,12 +435,13 @@
 
   <section class="block" id="bukan-perwakilan">
     <div class="wrap">
-      <p class="kicker">04 · Yang membuat soal bukan perwakilan nilai lain</p>
-      <h2>Satu pertanyaan hanya mewakili satu nilai jika ia menolak proses dua seksi sisanya.</h2>
+      <p class="kicker">05 · Yang membuat soal bukan untuk seksi lain</p>
+      <h2>Satu pertanyaan hanya dikunci ke satu nilai jika ia menolak proses dua seksi sisanya.</h2>
       <p class="prose">
         Kebocoran konstruk = soal yang salah seksi. Validator di
         <span class="mono">question_rules.py</span> menolak bentuk yang salah;
-        kunci konstruk menolak isi yang salah nilai.
+        kunci konstruk menolak isi yang salah nilai. Ini gerbang produksi, bukan bukti bahwa
+        jawaban lisan lalu “benar-benar” mengukur konstruk psikometrik tersebut.
       </p>
       <div class="leaks" id="leaks"></div>
       <ul class="rules prose">
@@ -335,7 +455,7 @@
 
   <section class="block" id="urutan">
     <div class="wrap">
-      <p class="kicker">05 · Urutan kerja di kode</p>
+      <p class="kicker">06 · Urutan kerja di kode</p>
       <h2>Lazy, satu seksi berjalan: verbal → logika → kuantitatif.</h2>
       <p class="prose">
         Tautan terbit tanpa soal. Soal digenerate setelah peserta mengisi identitas.
@@ -359,14 +479,15 @@
     <footer class="colophon prose">
       <p>
         Sumber disalin dari commit <code>45e2797</code> pada <code>origin/dev</code>
-        tanpa checkout, tanpa branch, tanpa PR.
+        tanpa mengubah repo produksi.
         File:
-        <code>question_service.py</code>,
         <code>education_rules.py</code>,
+        <code>question_service.py</code>,
         <code>question_rules.py</code>,
         <code>question_pipeline.py</code>,
         <code>section_routing.py</code>,
-        <code>docs/adr/0003-domain-questions-despite-q1-training.md</code>.
+        <code>docs/adr/0003-domain-questions-despite-q1-training.md</code>,
+        <code>CONTEXT.md</code>.
         Identitas di halaman ini contoh fiktif.
       </p>
     </footer>

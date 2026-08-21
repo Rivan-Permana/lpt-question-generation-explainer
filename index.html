@@ -47,80 +47,85 @@
       <p class="kicker">01 · Tiga pemroses</p>
       <h2>LLM menulis soal; model akustik menskor audio; LLM lain menulis narasi.</h2>
       <p class="prose">
-        Alur produksi dari kiri ke kanan. Dua langkah yang sering disamakan sebagai “AI”
+        Alur dari atas ke bawah. Dua langkah yang sering disamakan sebagai “AI”
         kerjanya berbeda. Narasi PDF datang belakangan dan tidak masuk ke skor.
       </p>
-    </div>
-    <div class="wide">
-      <div class="pipeline" aria-label="Alur asesmen">
-        <div class="step">
+
+      <ol class="timeline" aria-label="Alur asesmen">
+        <li>
           <span class="n">01</span>
           <b>Identitas</b>
-          <p>Usia, pendidikan, pekerjaan. Band pendidikan menetapkan <span class="mono">difficulty_target</span>. Usia hanya konteks.</p>
-        </div>
-        <div class="step is-llm">
+          <p>Usia, pendidikan, pekerjaan. Band pendidikan menetapkan <code>difficulty_target</code>. Usia hanya konteks.</p>
+        </li>
+        <li class="key">
           <span class="n">02 · LLM soal</span>
           <b>Tulis pertanyaan</b>
-          <p>Family <span class="mono">question_generation</span>. Auto-approve setelah validator bentuk. Tidak menskor peserta.</p>
-        </div>
-        <div class="step is-audio">
+          <p>Family <code>question_generation</code>. Auto-approve setelah validator bentuk. Tidak menskor peserta.</p>
+        </li>
+        <li>
           <span class="n">03</span>
           <b>Rekaman suara</b>
-          <p>60–120 detik di browser. Audio saja, tanpa kamera, tanpa jeda. Potongan 2&nbsp;MiB.</p>
-        </div>
-        <div class="step">
+          <p>60–120 detik di browser. Audio saja, tanpa kamera, tanpa jeda.</p>
+        </li>
+        <li>
           <span class="n">04</span>
           <b>QC audio</b>
           <p>Lulus atau gagal mutu rekaman. Bukan validitas konstruk. Gagal → nilai seksi itu absen.</p>
-        </div>
-        <div class="step is-model">
+        </li>
+        <li class="key">
           <span class="n">05 · Model seksi</span>
           <b>Skor dari audio</b>
           <p>voiLPTUI / Voilogik / Voikuan. Tidak membaca teks soal. Hanya audio seksi yang cocok.</p>
-        </div>
-        <div class="step">
+        </li>
+        <li>
           <span class="n">06</span>
           <b>Nilai</b>
           <p>Satu nilai per seksi. TPA = rata-rata ketiga nilai, hanya jika ketiganya ada.</p>
-        </div>
-        <div class="step is-later">
+        </li>
+        <li class="key">
           <span class="n">07 · belakangan</span>
           <b>Narasi PDF</b>
-          <p>Family <span class="mono">narrative_generation</span>. LLM menulis teks laporan dari skor. Bukan soal, bukan skor.</p>
-        </div>
-      </div>
-    </div>
-    <div class="wrap">
+          <p>Family <code>narrative_generation</code>. LLM menulis teks laporan dari skor. Bukan soal, bukan skor.</p>
+        </li>
+      </ol>
+
       <div class="roles">
-        <article class="role not-score">
+        <article class="role">
           <div class="who">Bukan penskor</div>
-          <h3>LLM soal</h3>
-          <p>
-            Family <code>question_generation</code>. Menulis satu pertanyaan terbuka
-            dari pendidikan, usia, dan pekerjaan. Validator deterministik memeriksa
-            bentuk; sistem menyetujui tanpa tinjauan ahli.
-          </p>
-          <p>Tidak melihat rekaman. Tidak mengeluarkan nilai.</p>
+          <div>
+            <h3>LLM soal</h3>
+            <p>
+              Family <code>question_generation</code>. Menulis satu pertanyaan terbuka
+              dari pendidikan, usia, dan pekerjaan. Validator memeriksa bentuk; sistem
+              menyetujui tanpa tinjauan ahli.
+            </p>
+            <p>Tidak melihat rekaman. Tidak mengeluarkan nilai.</p>
+          </div>
         </article>
         <article class="role scores">
           <div class="who">Yang menghasilkan nilai</div>
-          <h3>Model akustik</h3>
-          <p>
-            Tiga produk, satu per seksi. Runtime bersama: FFmpeg, eGeMAPS, RICH8, QC.
-            Dilatih pada audio VoiceIQ <code>pertanyaan == 1</code> (ADR 0003).
-          </p>
-          <p>Tidak membaca teks soal. Hanya menskor rekaman seksi yang cocok.</p>
+          <div>
+            <h3>Model akustik</h3>
+            <p>
+              Tiga produk, satu per seksi. Runtime bersama: FFmpeg, eGeMAPS, RICH8, QC.
+              Dilatih pada audio VoiceIQ <code>pertanyaan == 1</code> (ADR 0003).
+            </p>
+            <p>Tidak membaca teks soal. Hanya menskor rekaman seksi yang cocok.</p>
+          </div>
         </article>
-        <article class="role writes-later">
+        <article class="role">
           <div class="who">Setelah skor ada</div>
-          <h3>LLM narasi</h3>
-          <p>
-            Family <code>narrative_generation</code>. Menulis teks laporan PDF dari skor
-            yang sudah dihitung. Bukan generasi soal dan bukan model akustik.
-          </p>
-          <p>Tidak mengubah nilai verbal, logika, kuantitatif, atau TPA.</p>
+          <div>
+            <h3>LLM narasi</h3>
+            <p>
+              Family <code>narrative_generation</code>. Menulis teks laporan PDF dari skor.
+              Bukan generasi soal dan bukan model akustik.
+            </p>
+            <p>Tidak mengubah nilai verbal, logika, kuantitatif, atau TPA.</p>
+          </div>
         </article>
       </div>
+
       <div class="split">
         <div class="callout">
           <h3>Suara di jalur skor</h3>
@@ -135,9 +140,8 @@
           <h3>Risiko yang diterima (ADR 0003)</h3>
           <p>
             Produksi tetap memakai tiga soal domain karena satu seksi = satu nilai.
-            Menskor satu rekaman dengan tiga model, atau mengulang satu prompt Q1 tiga kali,
-            ditolak sebagai regresi produk. Pergeseran kovariat antara pelatihan Q1 dan
-            soal domain adalah risiko sisa yang disadari, bukan bug tersembunyi.
+            Pergeseran kovariat antara pelatihan Q1 dan soal domain adalah risiko sisa
+            yang disadari, bukan bug tersembunyi.
           </p>
         </div>
       </div>
@@ -154,118 +158,121 @@
         <em>rekaman mana yang diskor</em>. Keduanya tidak boleh tertukar.
       </p>
 
-      <div class="table-scroll">
-      <table class="sheet ident">
-        <caption>
-          <span class="cap-n">Tabel 1.</span>
-          Identitas produksi per nilai. Satu baris = satu seksi = satu rekaman = satu model.
-          Family akustik bukan family LLM <code>question_generation</code>.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Nilai</th>
-            <th scope="col">Seksi <span class="unit">section_key</span></th>
-            <th scope="col">Produk model <span class="unit">pin di baris kedua</span></th>
-            <th scope="col">Family akustik <span class="unit">bukan family LLM</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-col="verbal">
-            <th scope="row">Verbal</th>
-            <td><code>verbal</code></td>
-            <td>voiLPTUI <span class="subcode">xgb_q1_feat158_r027</span></td>
-            <td class="mono-cell"><code>prompt_family_q1</code></td>
-          </tr>
-          <tr data-col="logika">
-            <th scope="row">Logika</th>
-            <td><code>logika</code></td>
-            <td>Voilogik <span class="subcode">xgb_q1_feat158_logika_r020</span></td>
-            <td class="mono-cell"><code>prompt_family_q1_logika</code></td>
-          </tr>
-          <tr data-col="kuantitatif">
-            <th scope="row">Kuantitatif</th>
-            <td><code>kuantitatif</code></td>
-            <td>Voikuan <span class="subcode">xgb_q1_feat120_kuant_r011</span></td>
-            <td class="mono-cell"><code>prompt_family_q1_kuantitatif</code></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="sheet-block">
+        <div class="table-scroll">
+          <table class="sheet ident">
+            <caption>
+              <span class="cap-n">Tabel 1</span>
+              Identitas produksi per nilai
+              <span class="cap-body">Satu baris = satu seksi = satu rekaman = satu model. Family akustik ≠ family LLM.</span>
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Nilai</th>
+                <th scope="col">Seksi</th>
+                <th scope="col">Produk model</th>
+                <th scope="col">Family akustik</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-col="verbal">
+                <th scope="row">Verbal</th>
+                <td><code>verbal</code></td>
+                <td>voiLPTUI <span class="subcode">xgb_q1_feat158_r027</span></td>
+                <td><code>prompt_family_q1</code></td>
+              </tr>
+              <tr data-col="logika">
+                <th scope="row">Logika</th>
+                <td><code>logika</code></td>
+                <td>Voilogik <span class="subcode">xgb_q1_feat158_logika_r020</span></td>
+                <td><code>prompt_family_q1_logika</code></td>
+              </tr>
+              <tr data-col="kuantitatif">
+                <th scope="row">Kuantitatif</th>
+                <td><code>kuantitatif</code></td>
+                <td>Voikuan <span class="subcode">xgb_q1_feat120_kuant_r011</span></td>
+                <td><code>prompt_family_q1_kuantitatif</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <p class="table-note">
-        Baris yang ditandai mengikuti nilai yang dipilih di bagian demonstrasi.
-        TPA = rata-rata ketiga nilai, dua desimal, hanya jika ketiganya ada.
-        Runtime DSP/QC (FFmpeg, eGeMAPS, RICH8) dipakai ketiga layanan; QC tidak mengukur konstruk.
+        Highlight mengikuti nilai yang dipilih di demonstrasi.
+        TPA = rata-rata ketiga nilai bila ketiganya ada. QC tidak mengukur konstruk.
       </p>
 
-      <table class="sheet construct" id="construct-table">
-        <caption>
-          <span class="cap-n">Tabel 2.</span>
-          Kunci konstruk operasional untuk nilai yang sedang diperiksa.
-          Ini teks <code>_DOMAIN_CONSTRUCT</code>, bukan item CHC/ECD dengan rubrik.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Aspek</th>
-            <th scope="col">Isi di produksi <span class="unit" id="construct-unit">nilai verbal</span></th>
-          </tr>
-        </thead>
-        <tbody id="construct-body"></tbody>
-      </table>
+      <div class="sheet-block">
+        <table class="sheet construct" id="construct-table">
+          <caption>
+            <span class="cap-n">Tabel 2</span>
+            Kunci konstruk operasional
+            <span class="cap-body" id="construct-unit">Nilai verbal — teks <code>_DOMAIN_CONSTRUCT</code>, bukan item CHC/ECD berubrik.</span>
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Aspek</th>
+              <th scope="col">Isi di produksi</th>
+            </tr>
+          </thead>
+          <tbody id="construct-body"></tbody>
+        </table>
+      </div>
 
-      <div class="table-scroll">
-      <table class="sheet diff" id="diff-table">
-        <caption>
-          <span class="cap-n">Tabel 3.</span>
-          Band pendidikan menetapkan <code>difficulty_target</code> (titik tengah rentang, skala 0–1 di prompt).
-          Bukan parameter IRT, bukan adaptasi item.
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">Band pendidikan</th>
-            <th scope="col">Jenjang yang dipetakan <span class="unit">LEVEL_TO_BAND</span></th>
-            <th scope="col" class="num" data-col="verbal">Verbal &amp; logika <span class="unit">target (rentang)</span></th>
-            <th scope="col" class="num" data-col="kuantitatif">Kuantitatif <span class="unit">target (rentang)</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr data-band="dasar">
-            <th scope="row">dasar</th>
-            <td><code>sd</code>, <code>smp</code></td>
-            <td class="num" data-col="verbal">0.25 <span class="range">0.15–0.35</span></td>
-            <td class="num" data-col="kuantitatif">0.20 <span class="range">0.10–0.30</span></td>
-          </tr>
-          <tr data-band="menengah">
-            <th scope="row">menengah</th>
-            <td><code>sma</code>, <code>smk</code></td>
-            <td class="num" data-col="verbal">0.40 <span class="range">0.30–0.50</span></td>
-            <td class="num" data-col="kuantitatif">0.35 <span class="range">0.25–0.45</span></td>
-          </tr>
-          <tr data-band="diploma">
-            <th scope="row">diploma</th>
-            <td><code>d3</code>, <code>d4</code></td>
-            <td class="num" data-col="verbal">0.53 <span class="range">0.45–0.60</span></td>
-            <td class="num" data-col="kuantitatif">0.48 <span class="range">0.40–0.55</span></td>
-          </tr>
-          <tr data-band="sarjana">
-            <th scope="row">sarjana</th>
-            <td><code>s1</code>, <code>insinyur</code></td>
-            <td class="num" data-col="verbal">0.65 <span class="range">0.55–0.75</span></td>
-            <td class="num" data-col="kuantitatif">0.65 <span class="range">0.55–0.75</span></td>
-          </tr>
-          <tr data-band="pascasarjana">
-            <th scope="row">pascasarjana</th>
-            <td><code>s2</code>, <code>s3</code>, <code>profesor</code></td>
-            <td class="num" data-col="verbal">0.80 <span class="range">0.70–0.90</span></td>
-            <td class="num" data-col="kuantitatif">0.80 <span class="range">0.70–0.90</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="sheet-block">
+        <div class="table-scroll">
+          <table class="sheet diff" id="diff-table">
+            <caption>
+              <span class="cap-n">Tabel 3</span>
+              <code>difficulty_target</code> dari band pendidikan
+              <span class="cap-body">Titik tengah rentang (0–1). Bukan IRT, bukan adaptasi item.</span>
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Band</th>
+                <th scope="col">Jenjang</th>
+                <th scope="col" class="num" data-col="verbal">Verbal / logika</th>
+                <th scope="col" class="num" data-col="kuantitatif">Kuantitatif</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-band="dasar">
+                <th scope="row">dasar</th>
+                <td><code>sd</code>, <code>smp</code></td>
+                <td class="num" data-col="verbal">0.25 <span class="range">0.15–0.35</span></td>
+                <td class="num" data-col="kuantitatif">0.20 <span class="range">0.10–0.30</span></td>
+              </tr>
+              <tr data-band="menengah">
+                <th scope="row">menengah</th>
+                <td><code>sma</code>, <code>smk</code></td>
+                <td class="num" data-col="verbal">0.40 <span class="range">0.30–0.50</span></td>
+                <td class="num" data-col="kuantitatif">0.35 <span class="range">0.25–0.45</span></td>
+              </tr>
+              <tr data-band="diploma">
+                <th scope="row">diploma</th>
+                <td><code>d3</code>, <code>d4</code></td>
+                <td class="num" data-col="verbal">0.53 <span class="range">0.45–0.60</span></td>
+                <td class="num" data-col="kuantitatif">0.48 <span class="range">0.40–0.55</span></td>
+              </tr>
+              <tr data-band="sarjana">
+                <th scope="row">sarjana</th>
+                <td><code>s1</code>, <code>insinyur</code></td>
+                <td class="num" data-col="verbal">0.65 <span class="range">0.55–0.75</span></td>
+                <td class="num" data-col="kuantitatif">0.65 <span class="range">0.55–0.75</span></td>
+              </tr>
+              <tr data-band="pascasarjana">
+                <th scope="row">pascasarjana</th>
+                <td><code>s2</code>, <code>s3</code>, <code>profesor</code></td>
+                <td class="num" data-col="verbal">0.80 <span class="range">0.70–0.90</span></td>
+                <td class="num" data-col="kuantitatif">0.80 <span class="range">0.70–0.90</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       <p class="table-note">
-        Baris yang ditandai adalah band profil demonstrasi. Kuantitatif pada dasar / menengah / diploma
-        digeser −0,05 agar hitungan lisan tidak kelebihan beban. Usia <em>tidak</em> mengubah kolom ini.
-        Register bahasa Indonesia sehari-hari sama untuk semua baris; yang berubah adalah isi tugas
-        (<code>_DOMAIN_LIMITS</code>).
+        Kuantitatif pada dasar–diploma digeser −0,05. Usia tidak mengubah tabel ini.
+        Register bahasa sama untuk semua band; yang berubah isi tugas.
       </p>
     </div>
   </section>
@@ -362,8 +369,9 @@
         <div class="panel panel-table">
           <table class="sheet compact" id="derived-table">
             <caption>
-              <span class="cap-n">Tabel 4.</span>
-              Parameter yang dihitung backend untuk profil ini, lalu disisipkan ke CONSTRAINTS.
+              <span class="cap-n">Tabel 4</span>
+              Parameter backend untuk profil ini
+              <span class="cap-body">Disisipkan ke CONSTRAINTS prompt.</span>
             </caption>
             <thead>
               <tr>
@@ -419,12 +427,12 @@
             </p>
             <pre class="prompt" id="prompt"></pre>
             <div class="legend">
-              <span><i style="background:#0f4f4c"></i>konstruk</span>
-              <span><i style="background:#1c3558"></i>kesulitan × pendidikan</span>
-              <span><i style="background:#3b5a12"></i>batas domain</span>
-              <span><i style="background:#6b3f12"></i>usia (konteks, bukan cutoff)</span>
-              <span><i style="background:#8a3414"></i>pekerjaan sebagai bungkus</span>
-              <span><i style="background:#3f3a34"></i>aturan bentuk soal</span>
+              <span><i style="background:#0a6b63"></i>konstruk</span>
+              <span><i style="background:#1a4a8a"></i>kesulitan × pendidikan</span>
+              <span><i style="background:#3d6b12"></i>batas domain</span>
+              <span><i style="background:#7a4a16"></i>usia</span>
+              <span><i style="background:#9a3412"></i>pekerjaan</span>
+              <span><i style="background:#4a5568"></i>aturan bentuk</span>
             </div>
             <p class="user-json mono" id="user-json"></p>
           </details>

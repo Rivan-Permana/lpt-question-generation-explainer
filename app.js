@@ -402,7 +402,10 @@ function render() {
     el.classList.toggle("is-on", el.dataset.band === p.band);
   });
   const constructUnit = document.getElementById("construct-unit");
-  if (constructUnit) constructUnit.textContent = `nilai ${domain}`;
+  if (constructUnit) {
+    constructUnit.innerHTML =
+      `Nilai ${domain} — teks <code>_DOMAIN_CONSTRUCT</code>, bukan item CHC/ECD berubrik.`;
+  }
   document.getElementById("construct-body").innerHTML = constructRows(domain)
     .map(
       ([k, v]) => `

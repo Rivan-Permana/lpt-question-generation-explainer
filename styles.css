@@ -535,6 +535,7 @@ section.block + section.block {
 
 .instrument {
   display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
   margin: 1.25rem 0 1.5rem;
 }
@@ -548,8 +549,41 @@ fieldset.panel,
 }
 
 .panel-table {
-  padding: 1rem 1.1rem;
-  overflow-x: auto;
+  padding: 1rem 1.15rem 1.1rem;
+  overflow: visible;
+  width: 100%;
+}
+
+.panel-table .sheet {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.panel-table .sheet th:nth-child(1),
+.panel-table .sheet td:nth-child(1) {
+  width: 28%;
+}
+
+.panel-table .sheet th:nth-child(2),
+.panel-table .sheet td:nth-child(2) {
+  width: 44%;
+}
+
+.panel-table .sheet th:nth-child(3),
+.panel-table .sheet td:nth-child(3) {
+  width: 28%;
+}
+
+.panel-table .sheet td,
+.panel-table .sheet th {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.panel-table .sheet .num {
+  text-align: left;
+  white-space: normal;
 }
 
 legend {
@@ -903,7 +937,6 @@ footer.colophon code {
   .domains { grid-template-columns: repeat(3, 1fr); }
   .leaks { grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
   .flow { grid-template-columns: repeat(4, 1fr); }
-  .instrument { grid-template-columns: 1.1fr 0.9fr; align-items: start; }
 }
 
 @media (max-width: 640px) {

@@ -377,23 +377,30 @@ function render() {
   const prompt = assemblePrompt(p, domain, c);
   const ageLabel = p.ageBand.replaceAll("_", " ");
   document.getElementById("derived").innerHTML = [
-    ["education_band", "Hasil pemetaan jenjang → band", `<code>${p.band}</code>`, ""],
+    ["education_band", "Hasil pemetaan jenjang → band", `<code>${p.band}</code>`],
     [
       "difficulty_target",
       `Titik tengah rentang seksi ${domain} (skala 0–1)`,
-      fmt(c.target),
-      "num",
+      `<span class="mono">${fmt(c.target)}</span>`,
     ],
-    ["difficulty range", "Batas rendah–tinggi di prompt", `${fmt(c.low)}–${fmt(c.high)}`, "num"],
-    ["age_band", "Konteks penyampaian, bukan cutoff", escapeHtml(ageLabel), ""],
-    ["occupation", "Bungkus familiar; DATA literal", escapeHtml(p.occupation), ""],
+    [
+      "difficulty_range",
+      "Batas rendah–tinggi di prompt",
+      `<span class="mono">${fmt(c.low)}–${fmt(c.high)}</span>`,
+    ],
+    ["age_band", "Konteks penyampaian, bukan cutoff", `<strong>${escapeHtml(ageLabel)}</strong>`],
+    [
+      "occupation",
+      "Bungkus familiar; DATA literal",
+      `<strong>${escapeHtml(p.occupation)}</strong>`,
+    ],
   ]
     .map(
-      ([param, meaning, value, align]) => `
+      ([param, meaning, value]) => `
         <tr>
           <th scope="row"><code>${param}</code></th>
           <td class="meaning">${meaning}</td>
-          <td class="${align}">${value}</td>
+          <td>${value}</td>
         </tr>
       `,
     )
